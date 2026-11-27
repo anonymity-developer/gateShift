@@ -1,0 +1,39 @@
+# 로컬 환경과 비밀값
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.p12
+*.jks
+.local/
+uploads/
+
+# Java, Spring Boot
+.gradle/
+build/
+target/
+out/
+*.class
+application-local.yml
+application-local.yaml
+application-local.properties
+
+# Vue, Vite
+node_modules/
+dist/
+.vite/
+coverage/
+playwright-report/
+test-results/
+
+# IDE, OS, 로그
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
