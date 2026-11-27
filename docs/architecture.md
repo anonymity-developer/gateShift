@@ -11,7 +11,9 @@ flowchart TD
     App -->|"호텔 조건·근거 추출"| AI["Spring AI 모델 연동"]
 ```
 
-Spring Boot 애플리케이션 하나로 시작한다. Java 21, Vue 3 + Vite, MySQL을 사용하며 서버 패키지는 여행, 운항, 공항, 호텔, 영향 분석을 기준으로 구성한다. DB 마이그레이션과 영속화 방식은 첫 백엔드 PR에서 정하고 실행 방법을 README에 반영한다.
+Spring Boot 애플리케이션 하나로 시작한다. Java 21과 Spring Boot 3.5, Vue 3와 TypeScript 및 Vite, MySQL 8.4를 사용한다. 서버 패키지는 여행, 운항, 공항, 호텔, 영향 분석을 기준으로 구성한다. 영속화는 JPA, 스키마 변경은 Flyway로 관리한다. 로컬에서는 Docker Compose로 세 서비스를 띄우고 Nginx가 화면과 API를 동일 출처로 제공한다.
+
+MVP는 단일 백엔드에서 변경 이력을 MySQL 트랜잭션으로 저장하고 커밋 후 SSE로 알린다. 외부 호출 캐시를 여러 인스턴스가 공유하게 되면 Redis를, 별도의 소비 서비스가 운항 이벤트를 독립적으로 재처리해야 하면 Kafka를 검토한다.
 
 ## 데이터와 책임
 
