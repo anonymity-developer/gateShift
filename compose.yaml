@@ -1,0 +1,54 @@
+name: gateshift
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: gateshift
+      MYSQL_USER: gateshift
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-gateshift-local}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-gateshift-root-local}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_PASSWORD\" mysql -h 127.0.0.1 -u \"$$MYSQL_USER\" \"$$MYSQL_DATABASE\" -Nse 'SELECT 1'"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  backend:
+    build: ./backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/gateshift
+      SPRING_DATASOURCE_USERNAME: gateshift
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-gateshift-local}
+      AIRPORT_API_KEY: ${AIRPORT_API_KEY:-}
+      AI_API_KEY: ${AI_API_KEY:-}
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - -ec
+        - |
+          exec 3<>/dev/tcp/127.0.0.1/8080
+          printf 'GET /api/health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3
+          head -n 1 <&3 | grep -q '^HTTP/1\.1 200 '
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 20s
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:${GATESHIFT_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  mysql-data:
